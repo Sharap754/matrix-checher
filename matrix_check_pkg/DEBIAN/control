@@ -1,0 +1,8 @@
+Package: matrix-check
+Version: 1.0
+Section: base
+Priority: optional
+Architecture: amd64
+Depends: libstdc++6
+Maintainer: Sharap754 <lyakkoev.pavel04@gmail.com>
+Description: matrix_check
