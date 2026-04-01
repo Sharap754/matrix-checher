@@ -74,7 +74,7 @@ jobs:
           path: usr/bin
 
       - name: Build deb
-        run: ./deploy.sh "../maxfinder.deb"
+        run: ./deploy.sh "../matrix-check.deb"
         working-directory: ./cicd
 
       - name: Upload deb
