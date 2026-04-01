@@ -1,0 +1,95 @@
+ame: CI/CD-Pipeline
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential g++ make
+
+      - name: Build program
+        run: ./build.sh
+        working-directory: ./cicd
+
+      - name: Upload binary to artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentrim-binary
+          path: usr/bin/sentrim
+          retention-days: 1
+
+  Test:
+    needs: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential g++ make tree
+
+      - name: Create usr/bin/ directory for binary
+        run: mkdir -p usr/bin
+        working-directory: .
+
+      - name: Download binary from artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sentrim-binary
+          path: usr/bin
+
+      - name: Give permissions to binary
+        run: chmod +x sentrim
+        working-directory: ./usr/bin
+
+      - name: Run tests
+        run: ./test.sh
+        working-directory: ./cicd
+
+  Package:
+    needs: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev
+
+      - name: Create usr/bin directory
+        run: mkdir -p usr/bin
+        working-directory: .
+
+      - name: Download binary from artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sentrim-binary
+          path: usr/bin
+
+      - name: Build package
+        run: ./package.sh "sentrim_1.0_linux_amd64.deb"
+        working-directory: ./cicd
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentrim-deb-package
+          path: sentrim_1.0_linux_amd64.deb
