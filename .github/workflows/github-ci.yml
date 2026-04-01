@@ -48,7 +48,7 @@ jobs:
           path: usr/bin
       
       - name: Make binary executable
-        run: chmod +x usr/bin/maxfinder
+        run: chmod +x usr/bin/matrix_check
 
       - name: Run tests
         run: ./test.sh
