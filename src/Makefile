@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall
 
-TARGET = usr/bin/matrix_check  # <- путь к бинарнику
+TARGET = ../usr/bin/matrix_check  # <- путь к бинарнику
 SRC = main.cpp
 
 all: $(TARGET)
