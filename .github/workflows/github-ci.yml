@@ -46,7 +46,7 @@ jobs:
         with:
           name: binary
           path: usr/bin
-      
+
       - name: Make binary executable
         run: chmod +x usr/bin/matrix_check
 
