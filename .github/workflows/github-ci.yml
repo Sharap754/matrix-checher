@@ -1,13 +1,12 @@
-name: CI/CD-Pipeline
+name: CI Pipeline
 
 on:
   push:
-    branches: main
-  pull_request:
-    branches: main
+    branches: [ main ]
 
 jobs:
-  Build:
+
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,80 +15,70 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential g++ make
+          sudo apt update
+          sudo apt install -y build-essential
 
-      - name: Build program
+      - name: Build
         run: ./build.sh
         working-directory: ./cicd
 
-      - name: Upload binary to artifact
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: sentrim-binary
-          path: usr/bin/sentrim
-          retention-days: 1
+          name: binary
+          path: usr/bin/maxfinder
 
-  Test:
-    needs: Build
+  test:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clone repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential g++ make tree
+        run: sudo apt install -y build-essential
 
-      - name: Create usr/bin/ directory for binary
+      - name: Prepare binary
         run: mkdir -p usr/bin
-        working-directory: .
 
-      - name: Download binary from artifact
+      - name: Download binary
         uses: actions/download-artifact@v4
         with:
-          name: sentrim-binary
+          name: binary
           path: usr/bin
-
-      - name: Give permissions to binary
-        run: chmod +x sentrim
-        working-directory: ./usr/bin
+      
+      - name: Make binary executable
+        run: chmod +x usr/bin/maxfinder
 
       - name: Run tests
         run: ./test.sh
         working-directory: ./cicd
 
-  Package:
-    needs: Test
+  deploy:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clone repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y dpkg-dev
+      - name: Install dpkg
+        run: sudo apt install -y dpkg-dev
 
-      - name: Create usr/bin directory
+      - name: Prepare binary
         run: mkdir -p usr/bin
-        working-directory: .
 
-      - name: Download binary from artifact
+      - name: Download binary
         uses: actions/download-artifact@v4
         with:
-          name: sentrim-binary
+          name: binary
           path: usr/bin
 
-      - name: Build package
-        run: ./package.sh "sentrim_1.0_linux_amd64.deb"
+      - name: Build deb
+        run: ./deploy.sh "../maxfinder.deb"
         working-directory: ./cicd
 
-      - name: Upload package
+      - name: Upload deb
         uses: actions/upload-artifact@v4
         with:
-          name: sentrim-deb-package
-          path: sentrim_1.0_linux_amd64.deb
+          name: deb-package
+          path: maxfinder.deb
